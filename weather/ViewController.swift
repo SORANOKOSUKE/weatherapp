@@ -12,6 +12,24 @@ import Foundation
 import Alamofire
 import os
 
+struct WeatherData: Codable {
+    var timezone_abbreviation: String
+    var daily_units: [String: String]
+    var latitude: Double
+    var longitude: Double
+    var elevation: Int
+    var daily: [DailyWeather]
+    var utc_offset_seconds: Int
+    var generationtime_ms: Double
+}
+
+struct DailyWeather: Codable {
+    var temperature_2m_max: Double
+    var temperature_2m_min: Double
+    var time: String
+    var weather_code: Int
+}
+
 class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITabBarDelegate,UITableViewDataSource{
     @IBOutlet var mapView: MKMapView!
     let image =  UIImageView()
@@ -43,12 +61,26 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         let urlstr = "https://api.open-meteo.com/v1/forecast?"+"latitude=\(latitude)&longitude=\(longitude)&daily=\(daily),\(max),\(min)&timezone=\(timezone)"
         var tempArray = [[String]]()
         var weatherDescriptions: [String] = []
+        
+        if let weatherurl = URL(string: urlstr) {
+            AF.request(weatherurl).responseDecodable(of: WeatherData.self) {response in
+                switch response.result {
+                   case .success(let value):
+                        self.logger.trace("value.max\(value.daily)")
+                        //self.logger.trace("value.times\(value.times)")
+                   case .failure(let error):
+                        self.logger.error("Errorrrrrr\(error.localizedDescription)")
+                   }
+            }
+        }
+
 
         if let weatherurl = URL(string: urlstr) {
             AF.request(weatherurl).responseJSON { response in
                 switch response.result{
                     case .success(let value):
                         if let json = value as? [String: Any]{
+                            self.logger.trace("trace:\(json)")
                             if let dailyData = json["daily"] as? [String: Any],
                                let maxData = dailyData["temperature_2m_max"] as? [Double] ,let minData = dailyData["temperature_2m_min"] as? [Double],let timeData = dailyData["time"] as? [String] ,let wetherData = dailyData["weather_code"]as? [Double] {
                                 self.logger.trace("max data: \(maxData)")
@@ -118,6 +150,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
 
         return cell
     }
+
 }
     
 
