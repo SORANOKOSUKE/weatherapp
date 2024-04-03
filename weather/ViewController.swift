@@ -12,23 +12,6 @@ import Foundation
 import Alamofire
 import os
 
-struct WeatherData: Codable {
-    var timezone_abbreviation: String
-    var daily_units: [String: String]
-    var latitude: Double
-    var longitude: Double
-    var elevation: Int
-    var daily: [DailyWeather]
-    var utc_offset_seconds: Int
-    var generationtime_ms: Double
-}
-
-struct DailyWeather: Codable {
-    var temperature_2m_max: Double
-    var temperature_2m_min: Double
-    var time: String
-    var weather_code: Int
-}
 
 class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITabBarDelegate,UITableViewDataSource{
     @IBOutlet var mapView: MKMapView!
@@ -77,19 +60,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         var wareki : [String] = []
 
         if let weatherurl = URL(string: urlstr) {
-            AF.request(weatherurl).responseDecodable(of: WeatherData.self) {response in
-                switch response.result {
-                   case .success(let value):
-                        self.logger.trace("value.max\(value.daily)")
-                        //self.logger.trace("value.times\(value.times)")
-                   case .failure(let error):
-                        self.logger.error("Errorrrrrr\(error.localizedDescription)")
-                   }
-            }
-        }
-
-
-        if let weatherurl = URL(string: urlstr) {
             AF.request(weatherurl).responseJSON { response in
                 switch response.result{
                     case .success(let value):
@@ -136,7 +106,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                                     let inputFormatter = DateFormatter()
                                     inputFormatter.dateFormat = "yyyy-MM-dd"
                                     if let date = inputFormatter.date(from: dateString){
-                                        var outputFormatter = DateFormatter()
+                                        let outputFormatter = DateFormatter()
                                         outputFormatter.dateFormat = "yyyy年MM月dd日"
                                         let daystring = outputFormatter.string(from: date)
                                         wareki.append(daystring)
@@ -146,7 +116,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                                 completion(tempArray)
                             }
                         }
-                    case.failure(let error):
+                    case.failure(_):
                         self.logger.error("error")
                 }
             }
@@ -154,7 +124,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else {
+        guard touches.first != nil else {
                 return
             }
 
