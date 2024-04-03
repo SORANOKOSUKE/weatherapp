@@ -40,17 +40,30 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
     var lat : Double = 0
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
     var weatherarray : [String] = []
+    var pinAnnotations: [MKPointAnnotation] = []
 
     override func viewDidLoad() {
-        
+        super.viewDidLoad()
     }
-    
+
     @IBAction func mapViewDidPress(_ sender: UITapGestureRecognizer) {
         let tapPoint = sender.location(in: view)
         let center = mapView.convert(tapPoint, toCoordinateFrom: mapView)
         
         lon  = center.longitude
         lat  = center.latitude
+
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = center
+        annotation.title = "緯度：\(round(Float(lon)*100)/100)，経度：\(round(Float(lat)*100)/100)"
+        mapView.addAnnotation(annotation)
+
+        if !pinAnnotations.isEmpty {
+            let oldPin = pinAnnotations.removeFirst()
+            mapView.removeAnnotation(oldPin)
+        }
+
+        pinAnnotations.append(annotation)
     }
     
     func getLocationInfo(latitude: Double, longitude: Double, completion: @escaping ([[String]]) -> Void) {
@@ -61,7 +74,8 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         let urlstr = "https://api.open-meteo.com/v1/forecast?"+"latitude=\(latitude)&longitude=\(longitude)&daily=\(daily),\(max),\(min)&timezone=\(timezone)"
         var tempArray = [[String]]()
         var weatherDescriptions: [String] = []
-        
+        var wareki : [String] = []
+
         if let weatherurl = URL(string: urlstr) {
             AF.request(weatherurl).responseDecodable(of: WeatherData.self) {response in
                 switch response.result {
@@ -117,7 +131,17 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                                         default:
                                             weatherDescriptions.append("その他の天候")
                                     }
-                                    tempArray.append(["\(timeData[i]) ","最高気温\(maxData[i])°C","最低気温\(minData[i])°C","\(weatherDescriptions[i])"])
+
+                                    let dateString = timeData[i]
+                                    let inputFormatter = DateFormatter()
+                                    inputFormatter.dateFormat = "yyyy-MM-dd"
+                                    if let date = inputFormatter.date(from: dateString){
+                                        var outputFormatter = DateFormatter()
+                                        outputFormatter.dateFormat = "yyyy年MM月dd日"
+                                        let daystring = outputFormatter.string(from: date)
+                                        wareki.append(daystring)
+                                    }
+                                    tempArray.append(["\(wareki[i]) ","最高気温\(maxData[i])°C","最低気温\(minData[i])°C","\(weatherDescriptions[i])"])
                                 }
                                 completion(tempArray)
                             }
@@ -130,12 +154,22 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        guard let touch = touches.first else {
+                return
+            }
+
         getLocationInfo(latitude:lat,longitude:lon){ getArray in
             self.weatherarray = getArray.flatMap{$0}
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
+
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        if let annotation = view.annotation {
+            mapView.removeAnnotation(annotation)
         }
     }
 
@@ -143,10 +177,26 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         return weatherarray.count
     }
 
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView,  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherCell", for: indexPath)
 
         cell.textLabel?.text = weatherarray[indexPath.row]
+        
+        if indexPath.row % 4 == 1 {
+            cell.textLabel?.textColor = UIColor.red
+        }else if indexPath.row % 4 == 2 {
+            cell.textLabel?.textColor = UIColor.blue
+        }else{
+            cell.textLabel?.textColor = UIColor.black
+        }
+
+        if indexPath.row % 4 == 0 {
+                cell.layer.borderWidth = 1.0
+                cell.layer.borderColor = UIColor.black.cgColor
+        } else {
+            cell.layer.borderWidth = 0.0
+            cell.layer.borderColor = UIColor.clear.cgColor
+        }
 
         return cell
     }
