@@ -24,6 +24,6 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>アプリ起動時に位置情報の利用を許可する理由/目的を書く</string>
+	<string>天気予報のために位置情報が必要です．</string>
 </dict>
 </plist>
