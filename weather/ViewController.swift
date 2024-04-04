@@ -13,7 +13,7 @@ import Alamofire
 import os
 
 
-class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITableViewDataSource,UITableViewDelegate{
+class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITableViewDelegate,UITableViewDataSource{
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var pressGesrec: UITapGestureRecognizer!
     @IBOutlet weak var tebleView: UITableView!
@@ -136,7 +136,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         getLocationInfo(latitude:lat,longitude:lon){ getArray in
             self.weatherarray = getArray.flatMap{$0}
             DispatchQueue.main.async {
-                self.tableView.reloadData()
+                self.tebleView.reloadData()
             }
         }
     }
@@ -152,7 +152,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
     }
 
     func tableView(_ tableView: UITableView,  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "weatherCell", for: indexPath)
 
         cell.textLabel?.text = weatherarray[indexPath.row]
         
