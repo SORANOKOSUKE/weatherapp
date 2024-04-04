@@ -12,34 +12,21 @@ import Foundation
 import Alamofire
 import os
 
-<<<<<<< Updated upstream
 
-class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITabBarDelegate,UITableViewDataSource{
-=======
 class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITableViewDataSource,UITableViewDelegate{
->>>>>>> Stashed changes
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var pressGesrec: UITapGestureRecognizer!
-<<<<<<< Updated upstream
-    @IBOutlet weak var tableView: UITableView!
-=======
     @IBOutlet weak var tebleView: UITableView!
->>>>>>> Stashed changes
     var locationManager: CLLocationManager!
     var lon : Double = 0
     var lat : Double = 0
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
     var weatherarray : [String] = []
-<<<<<<< Updated upstream
     var pinAnnotations: [MKPointAnnotation] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
-=======
 
-    override func viewDidLoad() {
-
->>>>>>> Stashed changes
     }
 
     @IBAction func mapViewDidPress(_ sender: UITapGestureRecognizer) {
@@ -48,7 +35,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         
         lon  = center.longitude
         lat  = center.latitude
-<<<<<<< Updated upstream
 
         let annotation = MKPointAnnotation()
         annotation.coordinate = center
@@ -61,10 +47,10 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         }
 
         pinAnnotations.append(annotation)
-=======
+
         self.logger.debug("lon:\(self.lon)")
         self.logger.debug("lat:\(self.lat)")
->>>>>>> Stashed changes
+
     }
     
     func getLocationInfo(latitude: Double, longitude: Double, completion: @escaping ([[String]]) -> Void) {
@@ -75,7 +61,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         let urlstr = "https://api.open-meteo.com/v1/forecast?"+"latitude=\(latitude)&longitude=\(longitude)&daily=\(daily),\(max),\(min)&timezone=\(timezone)"
         var tempArray = [[String]]()
         var weatherDescriptions: [String] = []
-<<<<<<< Updated upstream
         var wareki : [String] = []
 
         if let weatherurl = URL(string: urlstr) {
@@ -84,15 +69,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                     case .success(let value):
                         if let json = value as? [String: Any]{
                             self.logger.trace("trace:\(json)")
-=======
 
-        if let weatherurl = URL(string: urlstr){
-            AF.request(weatherurl).responseJSON{response in
-                switch response.result{
-                    case .success(let value):
-                        if let json = value as? [String: Any]{
-                            self.logger.debug("debugtest:\(json)")
->>>>>>> Stashed changes
                             if let dailyData = json["daily"] as? [String: Any],
                                let maxData = dailyData["temperature_2m_max"] as? [Double] ,let minData = dailyData["temperature_2m_min"] as? [Double],let timeData = dailyData["time"] as? [String] ,let wetherData = dailyData["weather_code"]as? [Double] {
                                 self.logger.trace("max data: \(maxData)")
@@ -129,7 +106,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                                         default:
                                             weatherDescriptions.append("その他の天候")
                                     }
-<<<<<<< Updated upstream
 
                                     let dateString = timeData[i]
                                     let inputFormatter = DateFormatter()
@@ -141,15 +117,11 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                                         wareki.append(daystring)
                                     }
                                     tempArray.append(["\(wareki[i]) ","最高気温\(maxData[i])°C","最低気温\(minData[i])°C","\(weatherDescriptions[i])"])
-=======
-                                    tempArray.append(["\(timeData[i]) ","最高気温\(maxData[i])°C","最低気温\(minData[i])°C","\(weatherDescriptions[i])"])
->>>>>>> Stashed changes
                                 }
                                 completion(tempArray)
                             }
                         }
-<<<<<<< Updated upstream
-                    case.failure(_):
+                  case.failure(_):
                         self.logger.error("error")
                 }
             }
@@ -203,39 +175,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
 
         return cell
     }
-
-=======
-                    case .failure(let error):
-                        self.logger.error("errorAF:\(error.localizedDescription)")
-                }
-            }
-        }
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    
-        getLocationInfo(latitude:lat,longitude:lon){ getArray in
-            self.weatherarray = getArray.flatMap{$0}
-            self.logger.debug("test\(self.weatherarray)")
-            DispatchQueue.main.async {
-                self.tebleView.reloadData()
-            }
-        }
-    }
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-
-        return  weatherarray.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "weatherCell", for: indexPath)
-
-        cell.textLabel?.text = weatherarray[indexPath.row]
-        return cell
-    }
-
->>>>>>> Stashed changes
 }
     
 
