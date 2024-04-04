@@ -6,24 +6,65 @@
 //
 
 import UIKit
+import os
 
-class SecondViewController: UIViewController {
+class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+
+    @IBOutlet weak var pickerView: UIPickerView!
+    let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
+    var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        pickerView.delegate = self
+        pickerView.dataSource = self
 
-        // Do any additional setup after loading the view.
     }
-    
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
     }
-    */
 
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return cities.count
+    }
+
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return cities[row]
+    }
+
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        if let coordinates = getCoordinates(for: cities[row]) {
+            let latitude = coordinates.latitude
+            let longitude = coordinates.longitude
+            self.logger.trace("Selected City: \(latitude),\(longitude)")
+        }
+    }
+
+    func getCoordinates(for city: String) -> (longitude: Double, latitude: Double)? {
+        switch city {
+        case "東京":
+            return (35.6895, 139.6917)
+        case "大阪":
+            return (34.6937, 135.5023)
+        case "名古屋":
+            return (35.1815, 136.9066)
+        case "札幌":
+            return (43.0618, 141.3545)
+        case "福岡":
+            return (33.5904, 130.4017)
+        case "仙台":
+            return (38.2682, 140.8694)
+        case "京都":
+            return (35.0116, 135.7681)
+        case "広島":
+            return (34.3853, 132.4553)
+        case "沖縄":
+            return (26.2124, 127.6809)
+        case "横浜":
+            return (35.4437, 139.6380)
+        default:
+            return nil // 都市名に対応する緯度経度が見つからない場合は nil を返す
+        }
+    }
 }
