@@ -3,7 +3,7 @@
 //  weather
 //
 //  Created by 空野耕介 on 2024/02/28.
-//
+//  text
 
 import UIKit
 
