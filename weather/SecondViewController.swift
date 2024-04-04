@@ -6,13 +6,19 @@
 //
 
 import UIKit
+import Foundation
 import os
 
-class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource,UITableViewDelegate,UITableViewDataSource {
 
     @IBOutlet weak var pickerView: UIPickerView!
+    @IBOutlet weak var table2View: UITableView!
+    var weatherarray : [String] = []
+
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
+
+    let viewController = ViewController()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,11 +43,18 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         if let coordinates = getCoordinates(for: cities[row]) {
             let latitude = coordinates.latitude
             let longitude = coordinates.longitude
-            self.logger.trace("Selected City: \(latitude),\(longitude)")
+            self.logger.trace("Selected City: 緯度\(latitude),経度\(longitude)")
+            viewController.getLocationInfo(latitude:latitude,longitude:longitude){ getArray in
+                self.logger.trace("getArray:\(getArray)")
+                self.weatherarray = getArray.flatMap{$0}
+                DispatchQueue.main.async {
+                    self.table2View.reloadData()
+                }
+            }
         }
     }
 
-    func getCoordinates(for city: String) -> (longitude: Double, latitude: Double)? {
+    func getCoordinates(for city: String) -> (latitude: Double,longitude: Double)? {
         switch city {
         case "東京":
             return (35.6895, 139.6917)
@@ -66,5 +79,33 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         default:
             return nil // 都市名に対応する緯度経度が見つからない場合は nil を返す
         }
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return weatherarray.count
+    }
+
+    func tableView(_ tableView: UITableView,  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "citiesCell", for: indexPath)
+
+        cell.textLabel?.text = weatherarray[indexPath.row]
+
+        if indexPath.row % 4 == 1 {
+            cell.textLabel?.textColor = UIColor.red
+        }else if indexPath.row % 4 == 2 {
+            cell.textLabel?.textColor = UIColor.blue
+        }else{
+            cell.textLabel?.textColor = UIColor.black
+        }
+
+        if indexPath.row % 4 == 0 {
+                cell.layer.borderWidth = 1.0
+                cell.layer.borderColor = UIColor.black.cgColor
+        } else {
+            cell.layer.borderWidth = 0.0
+            cell.layer.borderColor = UIColor.clear.cgColor
+        }
+
+        return cell
     }
 }

@@ -174,6 +174,8 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
 
         return cell
     }
+
+
 }
     
 
