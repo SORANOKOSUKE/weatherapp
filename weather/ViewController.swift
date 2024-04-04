@@ -136,9 +136,8 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         getLocationInfo(latitude:lat,longitude:lon){ getArray in
             self.weatherarray = getArray.flatMap{$0}
             DispatchQueue.main.async {
-                self.tableView.reloadData()
+                tableView.reloadData()
             }
-
         }
     }
     
