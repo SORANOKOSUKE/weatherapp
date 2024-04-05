@@ -8,12 +8,13 @@
 import UIKit
 import Foundation
 import os
+import Combine
 
 class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource,UITableViewDelegate,UITableViewDataSource {
 
     @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var table2View: UITableView!
-    
+    @IBOutlet weak var scrollView: UIScrollView!
     var weatherarray : [String] = []
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
@@ -25,13 +26,17 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         super.viewDidLoad()
         pickerView.delegate = self
         pickerView.dataSource = self
+        subjectTask(latitude: 35.6895, longitude: 139.6917)
+        scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 2)
+        scrollView.addSubview(pickerView)
+        scrollView.addSubview(table2View)
 
     }
 
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
-
+    
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return cities.count
     }
@@ -44,16 +49,30 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         if let coordinates = getCoordinates(for: cities[row]) {
             let latitude = coordinates.latitude
             let longitude = coordinates.longitude
-            self.logger.trace("Selected City: 緯度\(latitude),経度\(longitude)")
-            viewController.getLocationInfo(latitude:latitude,longitude:longitude){ getArray in
-                self.logger.trace("getArray:\(getArray)")
-                self.weatherarray = getArray.flatMap{$0}
-                DispatchQueue.main.async {
-                    self.table2View.reloadData()
-                }
-            }
+            subjectTask(latitude: latitude, longitude: longitude)
         }
     }
+    
+    func subjectTask(latitude: Double, longitude: Double) -> Void {
+        var tempArray = [[String]]()
+        var weatherDescriptions: [String] = []
+
+        viewController.getLocation(urlstr: viewController.getURL(latitude: latitude, longitude: longitude))
+            .sink(receiveCompletion: { completion in
+                print("completion:\(completion)")
+            }, receiveValue: { weatherForecast in
+                for (i, _) in weatherForecast.daily.time.enumerated() {
+                    weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
+
+                    tempArray.append(["\(weatherForecast.daily.time[i]) ","最高気温\(weatherForecast.daily.temperature_2m_max[i])°C","最低気温\(weatherForecast.daily.temperature_2m_min[i])°C","\(weatherDescriptions[i])"])
+
+                    self.weatherarray = tempArray.flatMap{$0}
+                    self.table2View.reloadData()
+                }
+            })
+            .store(in: &viewController.cancellables)
+    }
+
 
     func getCoordinates(for city: String) -> (latitude: Double,longitude: Double)? {
         switch city {
