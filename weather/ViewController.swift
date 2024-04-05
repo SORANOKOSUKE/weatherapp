@@ -13,6 +13,7 @@ import Alamofire
 import os
 import Combine
 
+//weatherStruct
 struct WeatherForecast: Decodable {
     let latitude: Double
     let longitude: Double
@@ -26,6 +27,8 @@ struct DailyWeatherData: Decodable {
     let temperature_2m_max: [Double]
     let temperature_2m_min: [Double]
 }
+
+
 
 class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecognizerDelegate,UITableViewDelegate,UITableViewDataSource{
     @IBOutlet var mapView: MKMapView!
@@ -118,7 +121,7 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
 
         getLocation(urlstr: getURL(latitude: lat, longitude: lon))
             .sink(receiveCompletion: { completion in
-                print("completion:\(completion)")
+                
             }, receiveValue: { weatherForecast in
                 for (i, date) in weatherForecast.daily.time.enumerated() {
                     weatherDescriptions.append(self.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))

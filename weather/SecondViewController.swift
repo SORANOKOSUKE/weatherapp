@@ -8,13 +8,43 @@
 import UIKit
 import Foundation
 import os
+import Alamofire
+import Combine
+
+//newsStruct
+struct NewsForcast: Codable {
+    let status: String
+    let totalResults: Int
+    let articles: [Article]
+}
+
+struct Article: Codable {
+    let source: Source  //source
+    let author: String?
+    let title: String
+    let description: String?
+    let url: String
+    let urlToImage: String?
+    let publishedAt: String
+    let content: String?
+}
+
+struct Source: Codable {
+    let id: String?
+    let name: String
+}
 
 class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource,UITableViewDelegate,UITableViewDataSource {
 
     @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var table2View: UITableView!
+    @IBOutlet weak var table3View: UITableView!
     @IBOutlet weak var scrollView: UIScrollView!
     var weatherarray : [String] = []
+    var newsarray : [Any] = []
+    var imagearray : [Any] = []
+    var cancellables = Set<AnyCancellable>() //Combine
+
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
@@ -29,7 +59,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 2)
         scrollView.addSubview(pickerView)
         scrollView.addSubview(table2View)
-
+        scrollView.addSubview(table3View)
+        getNews()
     }
 
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -100,31 +131,72 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         }
     }
 
+    //publisher
+    func getLocation(url: String) -> AnyPublisher<NewsForcast, AFError> {
+        return AF.request(url)
+            .publishDecodable(type: NewsForcast.self)
+            .value()
+            .mapError { error in
+                return AFError.invalidURL(url: url)
+            }
+            .eraseToAnyPublisher()
+    }
+    //Subscriber
+    func getNews()-> Void {
+        getLocation(url: "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c").sink(receiveCompletion: { completion in
+                print("completion:\(completion)")
+            }, receiveValue: { NewsForcast in
+                for article in NewsForcast.articles{
+                    self.newsarray.append(article.title)
+                    self.imagearray.append(article.urlToImage!)
+                    print("\(self.imagearray)")
+                    self.table3View.reloadData()
+                }
+            })
+        .store(in: &cancellables)
+    }
+
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return weatherarray.count
+        if tableView == table2View {
+            return weatherarray.count
+        } else if tableView == table3View {
+            return newsarray.count
+        }
+        return 0
     }
 
     func tableView(_ tableView: UITableView,  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "citiesCell", for: indexPath)
+        
+        if tableView == table2View {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "citiesCell", for: indexPath)
+            cell.textLabel?.text = weatherarray[indexPath.row]
+            if indexPath.row % 4 == 1 {
+                cell.textLabel?.textColor = UIColor.red
+            }else if indexPath.row % 4 == 2 {
+                cell.textLabel?.textColor = UIColor.blue
+            }else{
+                cell.textLabel?.textColor = UIColor.black
+            }
+            if indexPath.row % 4 == 0 {
+                    cell.layer.borderWidth = 1.0
+                    cell.layer.borderColor = UIColor.black.cgColor
+            } else {
+                cell.layer.borderWidth = 0.0
+                cell.layer.borderColor = UIColor.clear.cgColor
+            }
+            return cell
 
-        cell.textLabel?.text = weatherarray[indexPath.row]
-
-        if indexPath.row % 4 == 1 {
-            cell.textLabel?.textColor = UIColor.red
-        }else if indexPath.row % 4 == 2 {
-            cell.textLabel?.textColor = UIColor.blue
-        }else{
-            cell.textLabel?.textColor = UIColor.black
+        } else if tableView == table3View {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "newsCell", for: indexPath)
+            cell.textLabel?.text = newsarray[indexPath.row] as? String
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
+            return cell
         }
-
-        if indexPath.row % 4 == 0 {
-                cell.layer.borderWidth = 1.0
-                cell.layer.borderColor = UIColor.black.cgColor
-        } else {
-            cell.layer.borderWidth = 0.0
-            cell.layer.borderColor = UIColor.clear.cgColor
-        }
-
-        return cell
+        return UITableViewCell()
     }
+
+
+
+
 }
