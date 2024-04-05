@@ -8,7 +8,6 @@
 import UIKit
 import Foundation
 import os
-import Combine
 
 class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource,UITableViewDelegate,UITableViewDataSource {
 
