@@ -13,6 +13,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
     @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var table2View: UITableView!
+    
     var weatherarray : [String] = []
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
