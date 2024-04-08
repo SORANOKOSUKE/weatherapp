@@ -89,7 +89,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             .sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
             }, receiveValue: { weatherForecast in
-                for (i, data) in weatherForecast.daily.time.enumerated() {
+                for (i, _) in weatherForecast.daily.time.enumerated() {
                     weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
 
                     tempArray.append(["\(weatherForecast.daily.time[i]) ","最高気温\(weatherForecast.daily.temperature_2m_max[i])°C","最低気温\(weatherForecast.daily.temperature_2m_min[i])°C","\(weatherDescriptions[i])"])
@@ -117,7 +117,6 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
                     self.newsarray.append(article.title)
-                    let imgURL = article.urlToImage
                     self.ImageSubcriber(imgurlstr : article.urlToImage)
                     //画像取得のためのsubcriber
                     self.table3View.reloadData()
