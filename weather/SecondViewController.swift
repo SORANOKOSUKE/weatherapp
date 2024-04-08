@@ -42,10 +42,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     @IBOutlet weak var scrollView: UIScrollView!
     var weatherarray : [String] = []
     var newsarray : [Any] = []
-    var imagearray : [String] = []
     var cancellables = Set<AnyCancellable>() //Combine
-
-
+    var imageArray : [UIImage] = []
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
@@ -81,7 +79,6 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             let latitude = coordinates.latitude
             let longitude = coordinates.longitude
             subjectTask(latitude: latitude, longitude: longitude)
-
         }
     }
     
@@ -97,7 +94,6 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
                     tempArray.append(["\(weatherForecast.daily.time[i]) ","最高気温\(weatherForecast.daily.temperature_2m_max[i])°C","最低気温\(weatherForecast.daily.temperature_2m_min[i])°C","\(weatherDescriptions[i])"])
                     self.weatherarray = tempArray.flatMap{$0}
-                    self.logger.debug("\(self.weatherarray)\(longitude)")
                     self.table2View.reloadData()
                 }
             })
@@ -121,7 +117,9 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
                     self.newsarray.append(article.title)
-                    self.imagearray.append(article.urlToImage)
+                    let imgURL = article.urlToImage
+                    self.ImageSubcriber(imgurlstr : article.urlToImage)
+                    //画像取得のためのsubcriber
                     self.table3View.reloadData()
                 }
             })
@@ -145,11 +143,25 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             .eraseToAnyPublisher()
     }
 
+    func ImageSubcriber(imgurlstr : String) -> Void {
+        self.getNewsImage(url : imgurlstr).sink(receiveCompletion: { completion in
+            print("completion[image]:\(completion)")
+        }, receiveValue: { image in
+            if let image2 = image {
+                self.imageArray.append(image2)
+                print("completion[image]:\(self.imageArray.count)")
+            }else{
+                self.imageArray.append(UIImage(named: "noimage.png")!)
+            }
+        })
+        .store(in: &self.cancellables)
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == table2View {
             return weatherarray.count
         } else if tableView == table3View {
-            return newsarray.count
+            return self.newsarray.count
         }
         return 0
     }
@@ -179,14 +191,9 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             let cell = tableView.dequeueReusableCell(withIdentifier: "newsCell", for: indexPath)
             cell.textLabel?.text = newsarray[indexPath.row] as? String
             cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
-            getNewsImage(url: imagearray[indexPath.row]).sink(receiveCompletion: { completion in
-                print("completion:\(completion)")
-            }, receiveValue: { image in
-                if let image = image {
-                    cell.imageView?.image = image.resize(size: CGSize(width: 80, height: 80))
-                }
-            })
-            .store(in: &cancellables)
+            if imageArray.count > 0 {
+                cell.imageView?.image = imageArray[indexPath.row].resize(size:CGSize(width: 70, height: 60))
+            }
             return cell
         }
         return UITableViewCell()
