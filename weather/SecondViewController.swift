@@ -44,6 +44,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     var newsarray : [Any] = []
     var cancellables = Set<AnyCancellable>() //Combine
     var imageArray : [UIImage] = []
+    var newsnote : [String] = []
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
@@ -87,7 +88,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         var weatherDescriptions: [String] = []
         viewController.getLocation(urlstr: viewController.getURL(latitude: latitude, longitude: longitude))
             .sink(receiveCompletion: { completion in
-                print("completion:\(completion)")
+                print("completion[weather]:\(completion)")
             }, receiveValue: { weatherForecast in
                 for (i, _) in weatherForecast.daily.time.enumerated() {
                     weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
@@ -101,7 +102,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
 
     //newsPublisher
-    func getNewsReport(url: String) -> AnyPublisher<NewsForcast, AFError> {
+    func getNewsReport() -> AnyPublisher<NewsForcast, AFError> {
+    let url = "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c"
         return AF.request(url)
             .publishDecodable(type: NewsForcast.self)
             .value()
@@ -112,12 +114,13 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
     //newsSubscriber
     func getNews()-> Void {
-        getNewsReport(url: "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c").sink(receiveCompletion: { completion in
+        getNewsReport().sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
                     self.newsarray.append(article.title)
                     self.ImageSubcriber(imgurlstr : article.urlToImage)
+                    self.newsnote.append(article.url)
                     //画像取得のためのsubcriber
                     self.table3View.reloadData()
                 }
@@ -196,6 +199,12 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             return cell
         }
         return UITableViewCell()
+    }
+
+    func tableView(_ tableView: UITableView, didSelect indexPath: IndexPath) {
+        if tableView == table3View {
+            self.logger.debug("\(indexPath.row)")
+        }
     }
 
     func getCoordinates(for city: String) -> (latitude: Double,longitude: Double)? {
