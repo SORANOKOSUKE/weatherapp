@@ -117,8 +117,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         let apikey = "9123f41483314392aa3dde64c4d29b1c"
         let co = "in" //jpの記事が取得できなくなった．インドの記事なら取得できる．．．なぜ？
         print("\(apikey),\(co)")
-        getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=\(co)&apiKey=\(apikey)")
-        //getNewsReport(url :  "https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=9123f41483314392aa3dde64c4d29b1c")
+        //getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=\(co)&apiKey=\(apikey)")
+        getNewsReport(url :  "https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=9123f41483314392aa3dde64c4d29b1c")
             .sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
             }, receiveValue: { NewsForcast in
