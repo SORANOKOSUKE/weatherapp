@@ -43,6 +43,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     var weatherarray : [String] = []
     var newsarray : [Any] = []
     var cancellables = Set<AnyCancellable>() //Combine
+    // var cancellables2 = Set<AnyCancellable>() //Combine
     var imageArray : [UIImage] = []
     var newsnote : [String] = []
 
@@ -90,7 +91,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             .sink(receiveCompletion: { completion in
                 print("completion[weather]:\(completion)")
             }, receiveValue: { weatherForecast in
-                for (i, data) in weatherForecast.daily.time.enumerated() {
+                for (i, _) in weatherForecast.daily.time.enumerated() {
                     weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
 
                     tempArray.append(["\(weatherForecast.daily.time[i]) ","最高気温\(weatherForecast.daily.temperature_2m_max[i])°C","最低気温\(weatherForecast.daily.temperature_2m_min[i])°C","\(weatherDescriptions[i])"])
@@ -102,8 +103,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
 
     //newsPublisher
-    func getNewsReport() -> AnyPublisher<NewsForcast, AFError> {
-    let url = "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c"
+    func getNewsReport(url:String) -> AnyPublisher<NewsForcast, AFError> {
         return AF.request(url)
             .publishDecodable(type: NewsForcast.self)
             .value()
@@ -114,26 +114,24 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
     //newsSubscriber
     func getNews()-> Void {
-        getNewsReport().sink(receiveCompletion: { completion in
+        getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c").sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
                     self.newsarray.append(article.title)
-                    let imgURL = article.urlToImage
-                    self.ImageSubcriber(imgurlstr : article.urlToImage)
                     self.newsnote.append(article.url)
-                    //画像取得のためのsubcriber
+                    self.ImageSubcriber(imgurlstr : article.urlToImage)
                     self.table3View.reloadData()
                 }
             })
         .store(in: &cancellables)
     }
 
-    //newsImagePublisher
+    //newsImagePublisher   //画像取得のためのsubcriber
     func getNewsImage(url: String)-> AnyPublisher<UIImage?,AFError>{
         AF.request(url)
             .publishData()
-            .compactMap { response in
+            .tryMap { response in
                 if let data = response.data{
                     UIImage(data: data)
                 }else{
@@ -157,7 +155,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                 self.imageArray.append(UIImage(named: "noimage.png")!)
             }
         })
-        .store(in: &self.cancellables)
+        .store(in: &cancellables)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -204,6 +202,9 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
     func tableView(_ tableView: UITableView, didSelect indexPath: IndexPath) {
         if tableView == table3View {
+            if UIApplication.shared.canOpenURL(URL(string: newsnote[indexPath.row])!) {
+                UIApplication.shared.open(URL(string: newsnote[indexPath.row])!, options: [:], completionHandler: nil)
+            }
             self.logger.debug("\(indexPath.row)")
         }
     }
@@ -250,4 +251,5 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return resizedImage!
     }
+
 }

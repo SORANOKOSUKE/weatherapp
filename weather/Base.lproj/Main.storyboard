@@ -134,7 +134,7 @@
                                         </connections>
                                     </tableView>
                                     <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Df-9c-rGU">
-                                        <rect key="frame" x="237" y="8" width="148" height="39"/>
+                                        <rect key="frame" x="245" y="8" width="148" height="39"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
                                         <state key="normal" title="Button"/>
