@@ -43,7 +43,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     var weatherarray : [String] = []
     var newsarray : [Any] = []
     var cancellables = Set<AnyCancellable>() //Combine
-    // var cancellables2 = Set<AnyCancellable>() //Combine
+    //var cancellables2 = Set<AnyCancellable>() //Combine
     var imageArray : [UIImage] = []
     var newsnote : [String] = []
 
@@ -114,7 +114,12 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
     //newsSubscriber
     func getNews()-> Void {
-        getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c").sink(receiveCompletion: { completion in
+        let apikey = "9123f41483314392aa3dde64c4d29b1c"
+        let co = "in" //jpの記事が取得できなくなった．インドの記事なら取得できる．．．なぜ？
+        print("\(apikey),\(co)")
+        getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=\(co)&apiKey=\(apikey)")
+        //getNewsReport(url :  "https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=9123f41483314392aa3dde64c4d29b1c")
+            .sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
@@ -131,11 +136,11 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     func getNewsImage(url: String)-> AnyPublisher<UIImage?,AFError>{
         AF.request(url)
             .publishData()
-            .tryMap { response in
+            .tryMap { response -> UIImage? in
                 if let data = response.data{
-                    UIImage(data: data)
+                    return UIImage(data: data)
                 }else{
-                    UIImage(named: "noimage.png")
+                    return UIImage(named: "noimage.png")
                 }
             }
             .mapError{error in
@@ -150,7 +155,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         }, receiveValue: { image in
             if let image2 = image {
                 self.imageArray.append(image2)
-                print("completion[image]:\(self.imageArray.count)")
+                self.logger.debug("complete:")
             }else{
                 self.imageArray.append(UIImage(named: "noimage.png")!)
             }
@@ -191,7 +196,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         } else if tableView == table3View {
             let cell = tableView.dequeueReusableCell(withIdentifier: "newsCell", for: indexPath)
             cell.textLabel?.text = newsarray[indexPath.row] as? String
-            cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 12)
+            cell.textLabel?.numberOfLines=0
             if imageArray.count > 0 {
                 cell.imageView?.image = imageArray[indexPath.row].resize(size:CGSize(width: 70, height: 60))
             }
@@ -200,12 +206,13 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         return UITableViewCell()
     }
 
-    func tableView(_ tableView: UITableView, didSelect indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView == table3View {
-            if UIApplication.shared.canOpenURL(URL(string: newsnote[indexPath.row])!) {
-                UIApplication.shared.open(URL(string: newsnote[indexPath.row])!, options: [:], completionHandler: nil)
+            if UIApplication.shared.canOpenURL(URL(string: self.newsnote[indexPath.row])!) {
+                UIApplication.shared.open(URL(string: self.newsnote[indexPath.row])!, options: [:], completionHandler: nil)
+            }else{
+                self.logger.error("UIApplication:error!")
             }
-            self.logger.debug("\(indexPath.row)")
         }
     }
 
