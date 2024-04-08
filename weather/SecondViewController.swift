@@ -44,8 +44,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     var newsarray : [Any] = []
     var imagearray : [String] = []
     var cancellables = Set<AnyCancellable>() //Combine
-    var tempArray = [[String]]()
-    var weatherDescriptions: [String] = []
+
 
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
@@ -82,21 +81,23 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             let latitude = coordinates.latitude
             let longitude = coordinates.longitude
             subjectTask(latitude: latitude, longitude: longitude)
+
         }
     }
     
     func subjectTask(latitude: Double, longitude: Double) -> Void {
-
+        var tempArray = [[String]]()
+        var weatherDescriptions: [String] = []
         viewController.getLocation(urlstr: viewController.getURL(latitude: latitude, longitude: longitude))
             .sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
             }, receiveValue: { weatherForecast in
-                for (i, _) in weatherForecast.daily.time.enumerated() {
-                    self.weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
+                for (i, data) in weatherForecast.daily.time.enumerated() {
+                    weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
 
-                    self.tempArray.append(["\(weatherForecast.daily.time[i]) ","最高気温\(weatherForecast.daily.temperature_2m_max[i])°C","最低気温\(weatherForecast.daily.temperature_2m_min[i])°C","\(self.weatherDescriptions[i])"])
-
-                    self.weatherarray = self.tempArray.flatMap{$0}
+                    tempArray.append(["\(weatherForecast.daily.time[i]) ","最高気温\(weatherForecast.daily.temperature_2m_max[i])°C","最低気温\(weatherForecast.daily.temperature_2m_min[i])°C","\(weatherDescriptions[i])"])
+                    self.weatherarray = tempArray.flatMap{$0}
+                    self.logger.debug("\(self.weatherarray)\(longitude)")
                     self.table2View.reloadData()
                 }
             })
@@ -182,7 +183,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                 print("completion:\(completion)")
             }, receiveValue: { image in
                 if let image = image {
-                    cell.imageView?.image = image.resize(size: CGSize(width: 50, height: 50))
+                    cell.imageView?.image = image.resize(size: CGSize(width: 80, height: 80))
                 }
             })
             .store(in: &cancellables)
