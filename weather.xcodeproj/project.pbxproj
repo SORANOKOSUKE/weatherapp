@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		2D2023642BBCD2CA00474277 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2D2023632BBCD2CA00474277 /* Alamofire */; };
 		2D2023662BBCD2CA00474277 /* AlamofireDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 2D2023652BBCD2CA00474277 /* AlamofireDynamic */; };
+		2D5A8F552BC37C4600405C47 /* noimage.png in Resources */ = {isa = PBXBuildFile; fileRef = 2D5A8F542BC37C4600405C47 /* noimage.png */; };
+		2D5A8F562BC37C4600405C47 /* noimage.png in Resources */ = {isa = PBXBuildFile; fileRef = 2D5A8F542BC37C4600405C47 /* noimage.png */; };
+		2D5A8F572BC37C4600405C47 /* noimage.png in Resources */ = {isa = PBXBuildFile; fileRef = 2D5A8F542BC37C4600405C47 /* noimage.png */; };
 		2DF5341C2BBE8BF700F0E4EF /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF5341B2BBE8BF700F0E4EF /* SecondViewController.swift */; };
 		C69C882C2B8F53C700A7D8D2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69C882B2B8F53C700A7D8D2 /* AppDelegate.swift */; };
 		C69C882E2B8F53C700A7D8D2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69C882D2B8F53C700A7D8D2 /* SceneDelegate.swift */; };
@@ -39,6 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2D5A8F542BC37C4600405C47 /* noimage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noimage.png; sourceTree = "<group>"; };
 		2DF5341B2BBE8BF700F0E4EF /* SecondViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondViewController.swift; sourceTree = "<group>"; };
 		C60A0F8D2B92143900B87AB7 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		C67C267D2BA417B40050CC5E /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
@@ -126,6 +130,7 @@
 				C69C88342B8F53C900A7D8D2 /* Assets.xcassets */,
 				C69C88362B8F53C900A7D8D2 /* LaunchScreen.storyboard */,
 				C69C88392B8F53C900A7D8D2 /* Info.plist */,
+				2D5A8F542BC37C4600405C47 /* noimage.png */,
 			);
 			path = weather;
 			sourceTree = "<group>";
@@ -260,6 +265,7 @@
 			files = (
 				C69C88382B8F53C900A7D8D2 /* LaunchScreen.storyboard in Resources */,
 				C69C88352B8F53C900A7D8D2 /* Assets.xcassets in Resources */,
+				2D5A8F552BC37C4600405C47 /* noimage.png in Resources */,
 				C69C88332B8F53C700A7D8D2 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,6 +274,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D5A8F562BC37C4600405C47 /* noimage.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +282,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D5A8F572BC37C4600405C47 /* noimage.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
