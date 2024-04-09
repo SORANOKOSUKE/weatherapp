@@ -24,7 +24,7 @@ struct Article: Codable {
     let title: String
     let description: String?
     let url: String
-    let urlToImage: String
+    let urlToImage: String?
     let publishedAt: String
     let content: String?
 }
@@ -40,10 +40,13 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     @IBOutlet weak var table2View: UITableView!
     @IBOutlet weak var table3View: UITableView!
     @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var land: UILabel!
     var weatherarray : [String] = []
     var newsarray : [Any] = []
     var cancellables = Set<AnyCancellable>() //Combine
+    //var cancellables2 = Set<AnyCancellable>() //Combine
     var imageArray : [UIImage] = []
+    var newsnote : [String] = []
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
@@ -55,7 +58,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         pickerView.delegate = self
         pickerView.dataSource = self
         subjectTask(latitude: 35.6895, longitude: 139.6917) //初期値「東京」
-        scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 1.5)
+        scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 1.6)
+        self.land.text = "  東京の天気"
         scrollView.addSubview(pickerView)
         scrollView.addSubview(table2View)
         scrollView.addSubview(table3View)
@@ -87,7 +91,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         var weatherDescriptions: [String] = []
         viewController.getLocation(urlstr: viewController.getURL(latitude: latitude, longitude: longitude))
             .sink(receiveCompletion: { completion in
-                print("completion:\(completion)")
+                print("completion[weather]:\(completion)")
             }, receiveValue: { weatherForecast in
                 for (i, _) in weatherForecast.daily.time.enumerated() {
                     weatherDescriptions.append(self.viewController.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
@@ -101,39 +105,48 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
 
     //newsPublisher
-    func getNewsReport(url: String) -> AnyPublisher<NewsForcast, AFError> {
+    func getNewsReport(url:String) -> AnyPublisher<NewsForcast, AFError> {
         return AF.request(url)
             .publishDecodable(type: NewsForcast.self)
             .value()
             .mapError { error in
-                return AFError.invalidURL(url: url)
+                return error
             }
             .eraseToAnyPublisher()
     }
     //newsSubscriber
     func getNews()-> Void {
-        getNewsReport(url: "https://newsapi.org/v2/top-headlines?country=jp&apiKey=9123f41483314392aa3dde64c4d29b1c").sink(receiveCompletion: { completion in
+        let apikey = "9123f41483314392aa3dde64c4d29b1c"
+        let co = "jp"
+        getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=\(co)&apiKey=\(apikey)")
+        .sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
+                if case let .failure(error) = completion {
+                    print("Error:\(error)")
+                }
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
                     self.newsarray.append(article.title)
-                    self.ImageSubcriber(imgurlstr : article.urlToImage)
-                    //画像取得のためのsubcriber
+                    self.newsnote.append(article.url)
+                    if let urltoimage = article.urlToImage{
+                        self.ImageSubcriber(imgurlstr : urltoimage)
+                    }else{
+                    }
                     self.table3View.reloadData()
                 }
             })
         .store(in: &cancellables)
     }
 
-    //newsImagePublisher
+    //newsImagePublisher   //画像取得のためのsubcriber
     func getNewsImage(url: String)-> AnyPublisher<UIImage?,AFError>{
         AF.request(url)
             .publishData()
-            .compactMap { response in
+            .tryMap { response -> UIImage? in
                 if let data = response.data{
-                    UIImage(data: data)
+                    return UIImage(data: data)
                 }else{
-                    UIImage(named: "noimage.png")
+                    return UIImage(named: "noimage.png")
                 }
             }
             .mapError{error in
@@ -148,12 +161,12 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         }, receiveValue: { image in
             if let image2 = image {
                 self.imageArray.append(image2)
-                print("completion[image]:\(self.imageArray.count)")
+                self.logger.debug("complete:")
             }else{
                 self.imageArray.append(UIImage(named: "noimage.png")!)
             }
         })
-        .store(in: &self.cancellables)
+        .store(in: &cancellables)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -189,8 +202,9 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         } else if tableView == table3View {
             let cell = tableView.dequeueReusableCell(withIdentifier: "newsCell", for: indexPath)
             cell.textLabel?.text = newsarray[indexPath.row] as? String
-            cell.textLabel?.font = UIFont.systemFont(ofSize: 10)
-            if imageArray.count > 0 {
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 12)
+            cell.textLabel?.numberOfLines=0
+            if imageArray.count > indexPath.row {
                 cell.imageView?.image = imageArray[indexPath.row].resize(size:CGSize(width: 70, height: 60))
             }
             return cell
@@ -198,7 +212,18 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         return UITableViewCell()
     }
 
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if tableView == table3View {
+            if UIApplication.shared.canOpenURL(URL(string: self.newsnote[indexPath.row])!) {
+                UIApplication.shared.open(URL(string: self.newsnote[indexPath.row])!, options: [:], completionHandler: nil)
+            }else{
+                self.logger.error("UIApplication:error!")
+            }
+        }
+    }
+
     func getCoordinates(for city: String) -> (latitude: Double,longitude: Double)? {
+        self.land.text = "  " + city + "の天気"
         switch city {
         case "東京":
             return (35.6895, 139.6917)
@@ -240,4 +265,5 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return resizedImage!
     }
+
 }

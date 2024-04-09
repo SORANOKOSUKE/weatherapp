@@ -112,8 +112,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
                 return
             }
         subjectTask()
-        self.logger.debug("\(self.weatherarray)")
-
     }
 
     func subjectTask() -> Void {
