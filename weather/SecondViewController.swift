@@ -24,7 +24,7 @@ struct Article: Codable {
     let title: String
     let description: String?
     let url: String
-    let urlToImage: String
+    let urlToImage: String?
     let publishedAt: String
     let content: String?
 }
@@ -57,7 +57,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         pickerView.delegate = self
         pickerView.dataSource = self
         subjectTask(latitude: 35.6895, longitude: 139.6917) //初期値「東京」
-        scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 1.5)
+        scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 1.6)
         scrollView.addSubview(pickerView)
         scrollView.addSubview(table2View)
         scrollView.addSubview(table3View)
@@ -108,24 +108,28 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             .publishDecodable(type: NewsForcast.self)
             .value()
             .mapError { error in
-                return AFError.invalidURL(url: url)
+                return error
             }
             .eraseToAnyPublisher()
     }
     //newsSubscriber
     func getNews()-> Void {
         let apikey = "9123f41483314392aa3dde64c4d29b1c"
-        let co = "in" //jpの記事が取得できなくなった．インドの記事なら取得できる．．．なぜ？
-        print("\(apikey),\(co)")
-        //getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=\(co)&apiKey=\(apikey)")
-        getNewsReport(url :  "https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=9123f41483314392aa3dde64c4d29b1c")
-            .sink(receiveCompletion: { completion in
+        let co = "jp"
+        getNewsReport(url : "https://newsapi.org/v2/top-headlines?country=\(co)&apiKey=\(apikey)")
+        .sink(receiveCompletion: { completion in
                 print("completion:\(completion)")
+                if case let .failure(error) = completion {
+                    print("Error:\(error)")
+                }
             }, receiveValue: { NewsForcast in
                 for article in NewsForcast.articles{
                     self.newsarray.append(article.title)
                     self.newsnote.append(article.url)
-                    self.ImageSubcriber(imgurlstr : article.urlToImage)
+                    if let urltoimage = article.urlToImage{
+                        self.ImageSubcriber(imgurlstr : urltoimage)
+                    }else{
+                    }
                     self.table3View.reloadData()
                 }
             })
@@ -198,7 +202,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             cell.textLabel?.text = newsarray[indexPath.row] as? String
             cell.textLabel?.font = UIFont.systemFont(ofSize: 12)
             cell.textLabel?.numberOfLines=0
-            if imageArray.count > 0 {
+            if imageArray.count > indexPath.row {
                 cell.imageView?.image = imageArray[indexPath.row].resize(size:CGSize(width: 70, height: 60))
             }
             return cell
