@@ -40,6 +40,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     @IBOutlet weak var table2View: UITableView!
     @IBOutlet weak var table3View: UITableView!
     @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var land: UILabel!
     var weatherarray : [String] = []
     var newsarray : [Any] = []
     var cancellables = Set<AnyCancellable>() //Combine
@@ -58,6 +59,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         pickerView.dataSource = self
         subjectTask(latitude: 35.6895, longitude: 139.6917) //初期値「東京」
         scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 1.6)
+        self.land.text = "  東京の天気"
         scrollView.addSubview(pickerView)
         scrollView.addSubview(table2View)
         scrollView.addSubview(table3View)
@@ -221,6 +223,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     }
 
     func getCoordinates(for city: String) -> (latitude: Double,longitude: Double)? {
+        self.land.text = "  " + city + "の天気"
         switch city {
         case "東京":
             return (35.6895, 139.6917)
