@@ -12,6 +12,7 @@ import Foundation
 import Alamofire
 import os
 import Combine
+import CoreData
 
 //weatherStruct
 struct WeatherForecast: Decodable {
@@ -35,8 +36,8 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
     @IBOutlet var pressGesrec: UITapGestureRecognizer!
     @IBOutlet weak var tebleView: UITableView!
     var locationManager: CLLocationManager!
-    var lon : Double = 0
-    var lat : Double = 0
+    var lon : Double = 139.6917
+    var lat : Double = 35.6895
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
     var weatherarray : [String] = []
     var pinAnnotations: [MKPointAnnotation] = []
@@ -45,6 +46,11 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let latlon = UserDefaults.standard.array(forKey: "latlon"){
+            lat = latlon[0] as! Double
+            lon = latlon[1] as! Double
+        }
+        subjectTask()
 
     }
 
@@ -54,7 +60,9 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         
         lon  = center.longitude
         lat  = center.latitude
-
+        let latlon : [Double] = [lat,lon]
+        UserDefaults.standard.set(latlon, forKey: "latlon")
+        
         let annotation = MKPointAnnotation()
         annotation.coordinate = center
         annotation.title = "緯度：\(round(Float(lon)*100)/100)，経度：\(round(Float(lat)*100)/100)"
@@ -66,9 +74,6 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
         }
 
         pinAnnotations.append(annotation)
-
-        self.logger.debug("lon:\(self.lon)")
-        self.logger.debug("lat:\(self.lat)")
 
     }
 
@@ -82,35 +87,22 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
     }
 
     //publisher
-    func getLocation(urlstr : String) -> PassthroughSubject<WeatherForecast, AFError> {
-        let subject = PassthroughSubject<WeatherForecast, AFError>()
+    func getLocation(urlstr : String) -> AnyPublisher<WeatherForecast, AFError> {
         AF.request(urlstr)
             .publishDecodable(type: WeatherForecast.self)
             .value()
             .mapError { error in
-                return AFError.invalidURL(url: urlstr)
+                return error
             }
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                    case .finished:
-                        self.logger.trace("API request completed.")
-                    case .failure(let error):
-                        subject.send(completion: .failure(error))
-                }
-            }, receiveValue: { weatherForecast in
-                subject.send(weatherForecast)
-                subject.send(completion: .finished)
-            })
-            .store(in: &cancellables)
-        return subject
+            .eraseToAnyPublisher()
     }
-
-
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard touches.first != nil else {
                 return
             }
+        print(lat,lon)
+
         subjectTask()
     }
 
@@ -120,7 +112,13 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
 
         getLocation(urlstr: getURL(latitude: lat, longitude: lon))
             .sink(receiveCompletion: { completion in
-                
+                switch completion {
+                    case .finished:
+                        self.logger.trace("API request completed.")
+                    case .failure(let error):
+                        // リクエストが失敗した場合の処理
+                        self.logger.error("API request failed with error: \(error)")
+                }
             }, receiveValue: { weatherForecast in
                 for (i, _) in weatherForecast.daily.time.enumerated() {
                     weatherDescriptions.append(self.WeatherCODE(weathercode: weatherForecast.daily.weather_code[i]))
@@ -133,6 +131,9 @@ class ViewController: UIViewController,CLLocationManagerDelegate ,UIGestureRecog
             })
             .store(in: &cancellables)
     }
+
+    
+
 
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         if let annotation = view.annotation {

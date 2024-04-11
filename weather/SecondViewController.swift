@@ -47,6 +47,8 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     //var cancellables2 = Set<AnyCancellable>() //Combine
     var imageArray : [UIImage] = []
     var newsnote : [String] = []
+    var lon : Double = 139.6917
+    var lat : Double = 35.6895
 
     let cities = ["東京", "大阪", "名古屋", "札幌", "福岡", "仙台", "京都", "広島", "沖縄", "横浜"]
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
@@ -57,7 +59,7 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         super.viewDidLoad()
         pickerView.delegate = self
         pickerView.dataSource = self
-        subjectTask(latitude: 35.6895, longitude: 139.6917) //初期値「東京」
+        subjectTask(latitude: lat , longitude: lon) //初期値「東京」
         scrollView.contentSize = CGSize(width:view.frame.size.width, height:view.frame.size.height * 1.6)
         self.land.text = "  東京の天気"
         scrollView.addSubview(pickerView)
@@ -80,9 +82,9 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         if let coordinates = getCoordinates(for: cities[row]) {
-            let latitude = coordinates.latitude
-            let longitude = coordinates.longitude
-            subjectTask(latitude: latitude, longitude: longitude)
+            lat = coordinates.latitude
+            lon = coordinates.longitude
+            subjectTask(latitude: lat, longitude: lon)
         }
     }
     
@@ -114,6 +116,24 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             }
             .eraseToAnyPublisher()
     }
+
+    //newsImagePublisher   /
+    func getNewsImage(url: String)-> AnyPublisher<UIImage?,AFError>{
+        AF.request(url)
+            .publishData()
+            .tryMap { response -> UIImage? in
+                if let data = response.data{
+                    return UIImage(data: data)
+                }else{
+                    return UIImage(named: "noimage.png")
+                }
+            }
+            .mapError{error in
+                return error as! AFError
+            }
+            .eraseToAnyPublisher()
+    }
+
     //newsSubscriber
     func getNews()-> Void {
         let apikey = "9123f41483314392aa3dde64c4d29b1c"
@@ -136,23 +156,6 @@ class SecondViewController: UIViewController, UIPickerViewDelegate, UIPickerView
                 }
             })
         .store(in: &cancellables)
-    }
-
-    //newsImagePublisher   //画像取得のためのsubcriber
-    func getNewsImage(url: String)-> AnyPublisher<UIImage?,AFError>{
-        AF.request(url)
-            .publishData()
-            .tryMap { response -> UIImage? in
-                if let data = response.data{
-                    return UIImage(data: data)
-                }else{
-                    return UIImage(named: "noimage.png")
-                }
-            }
-            .mapError{error in
-                return AFError.invalidURL(url: url)
-            }
-            .eraseToAnyPublisher()
     }
 
     func ImageSubcriber(imgurlstr : String) -> Void {
