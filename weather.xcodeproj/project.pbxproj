@@ -157,14 +157,14 @@
 			path = TableSource;
 			sourceTree = "<group>";
 		};
-		2D836B9D2BF1EF11004834B3 /* Manager */ = {
+		2D836B9D2BF1EF11004834B3 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
 				2D836B8B2BE9E7FF004834B3 /* WeatherSubscriber.swift */,
 				2D836B892BE9E7C9004834B3 /* WeatherService.swift */,
 				2D836B982BF18DFC004834B3 /* NewsManager.swift */,
 			);
-			path = Manager;
+			path = Repository;
 			sourceTree = "<group>";
 		};
 		2D836B9E2BF1EF34004834B3 /* Data */ = {
@@ -225,7 +225,7 @@
 				C69C882B2B8F53C700A7D8D2 /* AppDelegate.swift */,
 				C69C882D2B8F53C700A7D8D2 /* SceneDelegate.swift */,
 				2D836BA32BF2F6DC004834B3 /* ViewModel */,
-				2D836B9D2BF1EF11004834B3 /* Manager */,
+				2D836B9D2BF1EF11004834B3 /* Repository */,
 				2D836B9E2BF1EF34004834B3 /* Data */,
 				C69C88312B8F53C700A7D8D2 /* Main.storyboard */,
 				C69C88342B8F53C900A7D8D2 /* Assets.xcassets */,

@@ -77,7 +77,17 @@ class WeatherSubscriber {
         }
             return weatherstring
     }
+}
 
-    
-
+//publisher
+class WeatherService {
+    func getLocation(urlstr : String) -> AnyPublisher<WeatherForecast, AFError> {
+        AF.request(urlstr)
+            .publishDecodable(type: WeatherForecast.self)
+            .value()
+            .mapError { error in
+                return error
+            }
+            .eraseToAnyPublisher()
+    }
 }
