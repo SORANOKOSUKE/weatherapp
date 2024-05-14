@@ -13,12 +13,12 @@ class SecondViewModel {
     @Published var newsData: (titles: [Any], urls: [String], images: [UIImage]) = ([], [], [])
 
     private var cancellables = Set<AnyCancellable>()
-    private var weatherSubscriber = WeatherSubscriber()
+    private var weatherManager = WeatherManager()
     private var newsManager = NewsManager()
 
     func fetchWeatherData(forLatitude lat: Double, longitude lon: Double) {
         let url: String = getURL(latitude: lat, longitude: lon)
-        weatherSubscriber.subjectTask(urlString: url)
+        weatherManager.subjectTask(urlString: url)
             .sink(receiveCompletion: { completion in
                 //エラー文
             }, receiveValue: { data in

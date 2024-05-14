@@ -11,13 +11,13 @@ import Combine
 
 class WeatherViewModel {
     private var cancellables = Set<AnyCancellable>()
-    private var weatherSubscriber = WeatherSubscriber()
+    private var weatherManager = WeatherManager()
 
     var weatherDataSource = WeatherTableDataSource()
 
     func fetchWeatherData(forLatitude lat: Double, longitude lon: Double) {
         let url: String = getURL(latitude: lat, longitude: lon)
-        weatherSubscriber.subjectTask(urlString: url)
+        weatherManager.subjectTask(urlString: url)
             .sink(receiveCompletion: { completion in
 
             }, receiveValue: { data in

@@ -24,9 +24,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UIGestureReco
 
     let weatherDataSource = WeatherTableDataSource()
 
-    var lon : Double = 139.6917 //初期値東京
-    var lat : Double = 35.6895
-
     override func viewDidLoad() {
         super.viewDidLoad()
         //tableviewのデータソースの設定
@@ -39,7 +36,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, UIGestureReco
         if let latlon = UserDefaults.standard.array(forKey: "latlon") as? [Double] {
             weatherViewModel.fetchWeatherData(forLatitude: latlon[0] as Double,longitude: latlon[1] as Double)
         }
-
+        
         //mapviewの設定
         mapViewManager = MapViewManager(mapView: mapView)
         mapViewManager?.coordinateHandler = { lat, lon in

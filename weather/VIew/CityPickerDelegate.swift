@@ -16,7 +16,7 @@ class CityPickerDelegate: NSObject, UIPickerViewDelegate, UIPickerViewDataSource
 
     weak var delegate: CityPickerDelegateDelegate?
     var cityname: [String] = []
-    let weatherSubscriber = WeatherSubscriber()
+    let weatherManager = WeatherManager()
     var cancellables = Set<AnyCancellable>()
 
     init(cityname: [String]) {
@@ -40,7 +40,7 @@ class CityPickerDelegate: NSObject, UIPickerViewDelegate, UIPickerViewDataSource
                 let lat = coordinates.latitude
                 let lon = coordinates.longitude
 
-                weatherSubscriber.subjectTask(urlString: getURL(latitude: lat, longitude: lon))
+                weatherManager.subjectTask(urlString: getURL(latitude: lat, longitude: lon))
                     .sink(receiveCompletion: { completion in
                         // エラー処理などをここに追加するか、空にする
                     }, receiveValue: { data in

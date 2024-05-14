@@ -45,3 +45,9 @@ struct Source: Codable {
     let id: String?
     let name: String
 }
+
+struct CoordinateConfig {
+    let lat: Double
+    let lon: Double
+    
+}

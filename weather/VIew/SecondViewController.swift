@@ -23,18 +23,13 @@ class SecondViewController: UIViewController, CityPickerDelegateDelegate {
     let weatherDataSource = WeatherTableDataSource()
     let newsTableDataSource = NewsTableDataSource()
 
-    var weatherSubscriber =  WeatherSubscriber()
-    var newsmanager = NewsManager()
     var secondViewModel = SecondViewModel()
 
     let cityPickerDelegate = CityPickerDelegate(cityname: cities)
 
-    var weatherarray : [String] = []
-
     var cancellables = Set<AnyCancellable>() //Combine
 
-    var lon : Double = 139.6917
-    var lat : Double = 35.6895
+    var latlon = CoordinateConfig(lat : 35.6895,lon : 139.6917 )
 
     var logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
 
@@ -62,7 +57,7 @@ class SecondViewController: UIViewController, CityPickerDelegateDelegate {
         bindViewModel()
 
         //weatherdataの初期値　東京の天気情報を取得
-        secondViewModel.fetchWeatherData(forLatitude: lat, longitude: lon)
+        secondViewModel.fetchWeatherData(forLatitude: latlon.lat, longitude: latlon.lon)
         self.land.text = "東京の天気"
 
         //ニュースデータの情報を取得

@@ -9,8 +9,9 @@ import Foundation
 import Combine
 import UIKit
 import OSLog
+import Alamofire
 
-class WeatherSubscriber {
+class WeatherManager {
     let logger = Logger(subsystem: "com.amefure.sample", category: "Custom Category")
 
     var cancellables = Set<AnyCancellable>()
